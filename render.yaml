@@ -1,0 +1,42 @@
+databases:
+  - name: stocktracker-db
+    plan: free
+    databaseName: stock_tracker
+    user: stock_tracker
+
+services:
+  - type: web
+    name: stock-tracker-api
+    runtime: python
+    plan: free
+    rootDir: stock_tracker_backend
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: stocktracker-db
+          property: connectionString
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false          # you will set this after frontend is live
+      - key: PYTHON_VERSION
+        value: "3.12.3"
+
+  - type: web
+    name: stock-tracker-web
+    runtime: node
+    plan: free
+    rootDir: stock-tracker-frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        sync: false          # set after API is live (e.g. https://stock-tracker-api-xxxx.onrender.com/api)
+      - key: NODE_VERSION
+        value: "20"
