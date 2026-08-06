@@ -23,6 +23,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -53,26 +54,35 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
-DB_ENGINE = config("DB_ENGINE", default="sqlite3")
-
-if DB_ENGINE.lower() in ("sqlite", "sqlite3"):
+DATABASE_URL = config("DATABASE_URL", default=None)
+if DATABASE_URL:
     DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
+        "default": dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True,
+        )
     }
 else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": config("DB_NAME", default="stock_tracker"),
-            "USER": config("DB_USER", default="postgres"),
-            "PASSWORD": config("DB_PASSWORD", default="postgres"),
-            "HOST": config("DB_HOST", default="localhost"),
-            "PORT": config("DB_PORT", default="5432"),
+    DB_ENGINE = config("DB_ENGINE", default="sqlite3")
+    if DB_ENGINE.lower() in ("sqlite", "sqlite3"):
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": BASE_DIR / "db.sqlite3",
+            }
         }
-    }
+    else:
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": config("DB_NAME", default="stock_tracker"),
+                "USER": config("DB_USER", default="postgres"),
+                "PASSWORD": config("DB_PASSWORD", default="postgres"),
+                "HOST": config("DB_HOST", default="localhost"),
+                "PORT": config("DB_PORT", default="5432"),
+            }
+        }
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -87,8 +97,11 @@ TIME_ZONE = "Africa/Nairobi"
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
-MEDIA_URL = "media/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -106,9 +119,6 @@ REST_FRAMEWORK = {
 
 CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", default="http://localhost:3000", cast=Csv())
 CORS_ALLOW_CREDENTIALS = True
-# Expose Content-Disposition so the browser can read the download filename
 CORS_EXPOSE_HEADERS = ["Content-Disposition"]
 
-# Path to the live-synced Excel workbook (Sheet1 Products, Sheet2 Transactions,
-# Sheet3 Suppliers, Sheet4 Dashboard formulas) — see inventory/services/excel_sync.py
 EXCEL_WORKBOOK_PATH = BASE_DIR / config("EXCEL_WORKBOOK_PATH", default="media/exports/inventory.xlsx")
