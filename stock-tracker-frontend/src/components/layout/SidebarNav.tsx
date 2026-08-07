@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/products", label: "Products", icon: Package },
-  { href: "/moves", label: "Moves", icon: ArrowLeftRight },
+  { href: "/transactions", label: "Moves", icon: ArrowLeftRight },
   { href: "/reports", label: "Reports", icon: BarChart3 },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
