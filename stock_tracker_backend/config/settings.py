@@ -5,7 +5,7 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("SECRET_KEY", default="dev-secret-key")
-DEBUG = config("DEBUG", default=False, cast=bool)
+DEBUG = config("DEBUG", default=True, cast=bool)
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
 
 INSTALLED_APPS = [
@@ -21,6 +21,13 @@ INSTALLED_APPS = [
     "corsheaders",
     "inventory",
 ]
+
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS",
+    default="https://stock-tracker-api-0hgn.onrender.com",
+    cast=Csv(),
+)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
