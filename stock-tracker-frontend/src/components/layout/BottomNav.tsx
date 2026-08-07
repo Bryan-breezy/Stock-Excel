@@ -13,10 +13,10 @@ const TABS = [
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-export function BottomNav() {
+export function BottomNav({ className }: { className?: string }) {
   const pathname = usePathname();
   return (
-    <div className="flex bg-ink border-t border-ink">
+    <div className={cn("flex bg-ink border-t border-ink", className)}>
       {TABS.map((tab) => {
         const Icon = tab.icon;
         const active = pathname.startsWith(tab.href);
